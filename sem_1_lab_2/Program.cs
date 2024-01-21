@@ -12,7 +12,7 @@
     {
         static Player CreatePlayer()
         {
-            if (ct.TeamCount >= 16)
+            if ((random < 0 ? ct.TeamCount : rt.TeamCount) >= 16)
                 return null;
             string? position = null;
             do
@@ -44,7 +44,7 @@
             Refresh();
             _team.Last().SetPower(_team.Last().Recompute(_team.Last().info.position));
         }
-        protected void Refresh()
+        public void Refresh()
         {
             Player.TacticsByPosition = (p) => _tactics[positions.IndexOf(p) - 1];
             Player.CountCheck = (p) => CountProfessional(p) >= Player.TacticsByPosition.Invoke(p);
@@ -75,26 +75,29 @@
             }
             foreach (Player player in l)
                 Console.WriteLine("({0}) {1} - {2} - {3}", player.info.number, player.info.name, player.info.power * 100, GetSpeciality(player));
-            string? name1 = null;
+            int? number1 = null;
             do
             {
-                Console.Write("Enter the first player to switch: ");
-                try { name1 = Console.ReadLine(); }
+                Console.Write("Enter the number of the first player to switch: ");
+                try { number1 = int.Parse(Console.ReadLine()); }
                 catch (FormatException) { Console.WriteLine("Format error..."); }
             }
-            while (!_team.FindAll(x => x.info.position == position).Exists(x => x.info.name == name1));
-            foreach (Player player in _team.FindAll(x => x.info.name != name1))
+            while (!_team.FindAll(x => x.info.position == position).Exists(x => x.info.number == number1));
+            foreach (Player player in _team.FindAll(x => x.info.position != null && x.info.number != number1))
+                Console.WriteLine("({0}) {1} [{2}] - {3} - {4}", player.info.number, player.info.name, player.info.position,
+                                                                 player.info.power * 100, GetSpeciality(player));
+            foreach (Player player in _team.FindAll(x => x.info.position == null && x.info.number != number1))
                 Console.WriteLine("({0}) {1} - {2} - {3}", player.info.number, player.info.name, player.info.power * 100, GetSpeciality(player));
-            string? name2 = null;
+            int? number2 = null;
             do
             {
-                Console.Write("Enter the second player to switch: ");
-                try { name2 = Console.ReadLine(); }
+                Console.Write("Enter the number of the second player to switch: ");
+                try { number2 = int.Parse(Console.ReadLine()); }
                 catch (FormatException) { Console.WriteLine("Format error..."); }
             }
-            while (!_team.FindAll(x => x.info.name != name1).ToList().Exists(x => x.info.name == name2));
-            _team[_team.FindIndex(x => x.info.name == name1)].info.position = _team[_team.FindIndex(x => x.info.name == name2)].info.position;
-            _team[_team.FindIndex(x => x.info.name == name2)].info.position = position;
+            while (!_team.FindAll(x => x.info.number != number1).ToList().Exists(x => x.info.number == number2));
+            _team[_team.FindIndex(x => x.info.number == number1)].info.position = _team[_team.FindIndex(x => x.info.number == number2)].info.position;
+            _team[_team.FindIndex(x => x.info.number == number2)].info.position = position;
             foreach (Player player in _team)
                 _team[_team.IndexOf(player)].info.power = player.Recompute(player.info.position);
         }
@@ -169,17 +172,14 @@
             Console.Clear();
             _name = "Enemy team";
             _tactics = new int[3];
-            /*Random tactics_random = new Random();
+            Random tactics_random = new Random();
             _tactics[0] = tactics_random.Next(1, 6);
-            _tactics[1] = tactics_random.Next(6 - _tactics[0], 6);
-            _tactics[2] = 10 - _tactics.Sum();*/
-            _tactics[0] = 3;
-            _tactics[1] = 4;
-            _tactics[2] = 3;
+            _tactics[1] = tactics_random.Next(Math.Max(5 - _tactics[0], 1), Math.Min(9 - _tactics[0], 5));
+            _tactics[2] = 10 - _tactics.Sum();
             if (new_coach)
                 random = 0;
             rt.Add(Coach.CreateCoach());
-            for (random = 1; random <= 5; random++)
+            for (random = 1; random <= 3; random++)
                 rt.Add(Amateur.CreateAmateur(null));
             for (int i = random; random < i + 1; random++)
                 rt.Add(Goalkeeper.CreateGoalkeeper());
@@ -190,6 +190,7 @@
             for (int i = random; random < i + _tactics[2]; random++)
                 rt.Add(Attacker.CreateAttacker());
             random = -1;
+            ct.Refresh();
         }
     }
     class Player : IPlayer<Amateur>, IPlayer<Professional>
@@ -199,7 +200,7 @@
         public static Func<string, int> TacticsByPosition;
         public Action<int> SetPower;
         public RecomputeHandler Recompute;
-        protected static int count => ct.TeamCount;
+        protected static int count => random < 0 ? ct.TeamCount : rt.TeamCount;
         private string? _name = null;
         private int _number = -1;
         protected int _power;
@@ -318,7 +319,7 @@
     }
     class Goalkeeper : Professional
     {
-        protected static int count { get { return ct.CountProfessional("goalkeeper"); } set { } }
+        protected static int count { get { return random < 0 ? ct.CountProfessional("goalkeeper") : rt.CountProfessional("goalkeeper"); } set { } }
         private Goalkeeper() : base("goalkeeper")
         {
             if (technical)
@@ -472,8 +473,8 @@
         rt.Start(true);
         Console.Clear();
         ct.WriteOut();
-        Console.WriteLine("------------------ VS ----------------");
+        Console.WriteLine("------------------ VS ------------------");
         rt.WriteOut();
-        Console.WriteLine("Winner: " + Team.Winner);
+        Console.WriteLine("----------------------------------------\nWinner: " + Team.Winner);
     }
 }
