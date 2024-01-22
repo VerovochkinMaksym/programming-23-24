@@ -1,8 +1,4 @@
-﻿public class NullNameException : Exception
-{
-    public const string message = "The name cannot be empty!";
-}
-public class Program
+﻿public class Program
 {
     static bool technical = true;                          // constructors flag
     static bool help = true;
@@ -17,7 +13,7 @@ public class Program
             static Player CreatePlayer()
             {
                 if ((random < 0 ? ct.TeamCount : rt.TeamCount) >= 16)
-                    return null;
+                    throw new OutOfLimitException(new OutOfLimitExceptionArgs(typeof(T).Name));
                 string? position = null;
                 do
                 {
@@ -183,7 +179,7 @@ public class Program
                 if (new_coach)
                     random = 0;
                 rt.Add(Coach.CreateCoach());
-                for (random = 1; random <= 3; random++)
+                for (random = 1; random <= 4; random++)
                     rt.Add(Amateur.CreateAmateur(null));
                 for (int i = random; random < i + 1; random++)
                     rt.Add(Goalkeeper.CreateGoalkeeper());
@@ -333,7 +329,7 @@ public class Program
             public static Goalkeeper CreateGoalkeeper()
             {
                 if (Player.count >= 16 || count >= 1)
-                    return null;
+                    throw new OutOfLimitException(new OutOfLimitExceptionArgs("goalkeeper"));
                 return new Goalkeeper();
             }
             ~Goalkeeper() { if (technical) Console.WriteLine("\n >> Goalkeeper destructor\n"); }
@@ -348,7 +344,7 @@ public class Program
             public static Defender CreateDefender()
             {
                 if (count >= 16 || CountCheck.Invoke("defender"))
-                    return null;
+                    throw new OutOfLimitException(new OutOfLimitExceptionArgs("defender"));
                 return new Defender();
             }
             ~Defender() { if (technical) Console.WriteLine("\n >> Defender destructor\n"); }
@@ -363,7 +359,7 @@ public class Program
             public static Midfielder CreateMidfielder()
             {
                 if (count >= 16 || CountCheck.Invoke("midfielder"))
-                    return null;
+                    throw new OutOfLimitException(new OutOfLimitExceptionArgs("midfielder"));
                 return new Midfielder();
             }
             ~Midfielder() { if (technical) Console.WriteLine("\n >> Midfielder destructor\n"); }
@@ -378,7 +374,7 @@ public class Program
             public static Attacker CreateAttacker()
             {
                 if (count >= 16 || CountCheck.Invoke("attacker"))
-                    return null;
+                    throw new OutOfLimitException(new OutOfLimitExceptionArgs("attacker"));
                 return new Attacker();
             }
             ~Attacker() { if (technical) Console.WriteLine("\n >> Attacker destructor\n"); }
@@ -436,11 +432,11 @@ public class Program
                 {
                     case "amateur":
                         try { IPlayer<Amateur>.CreatePlayer(); }
-                        catch (NullReferenceException) { Console.WriteLine("You are out of the limit"); }
+                        catch (OutOfLimitException e) { Console.WriteLine(e.Message); }
                         break;
                     case "professional":
                         try { IPlayer<Professional>.CreatePlayer(); }
-                        catch (NullReferenceException) { Console.WriteLine("You are out of the limit"); }
+                        catch (OutOfLimitException e) { Console.WriteLine(e.Message); }
                         break;
                     case "switch": ct.Switch(); break;
                     case "write": ct.WriteOut(); break;
@@ -478,16 +474,34 @@ public class Program
         }
 }
 public static class ProgramExtension
+{
+    public static bool CheckAnswer(this Program program, string answer)
     {
-        public static bool CheckAnswer(this Program program, string answer)
+        char? ans = null;
+        do
         {
-            char? ans = null;
-            do
-            {
-                Console.WriteLine(answer + " (Y / N)");
-                try { ans = char.Parse(Console.ReadLine().ToLower()); }
-                catch (FormatException) { Console.WriteLine("Format error..."); }
-            } while (ans != 'y' && ans != 'n');
-            return ans == 'y' ? true : false;
-        }
+            Console.WriteLine(answer + " (Y / N)");
+            try { ans = char.Parse(Console.ReadLine().ToLower()); }
+            catch (FormatException) { Console.WriteLine("Format error..."); }
+        } while (ans != 'y' && ans != 'n');
+        return ans == 'y' ? true : false;
     }
+}
+public class NullNameException : Exception
+{
+    public const string message = "The name cannot be empty!";
+}
+public class OutOfLimitException : Exception
+{
+    public OutOfLimitException(OutOfLimitExceptionArgs a) : base(a.full_message) { }
+}
+public class OutOfLimitExceptionArgs
+{
+    private const string message = "s are out of limit. Cannot add more!";
+    private string speciality = null;
+    public string full_message => char.ToUpper(speciality[0]).ToString() + (speciality + message).Remove(0, 1);
+    public OutOfLimitExceptionArgs(string speciality)
+    {
+        this.speciality = speciality;
+    }
+}
