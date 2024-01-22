@@ -277,108 +277,108 @@
         ~Player() { if (technical) Console.WriteLine("\n >> Player destructor\n"); }
     }
     class Coach : Player
-        {
-            private static Coach coach = null;
-            private Coach() : base(new Random().Next(0, 2), null)
+    {
+        private static Coach coach = null;
+        private Coach() : base(new Random().Next(0, 2), null)
             {
                 if (technical)
                     Console.WriteLine("\n >> Coach constructor\n");
             }
-            public static Coach CreateCoach()
+        public static Coach CreateCoach()
             {
                 if (coach == null)
                     return new Coach();
                 return null;
             }
-            protected override int PowerComputing(string position) => _power;
-            ~Coach() { if (technical) Console.WriteLine("\n >> Coach destructor\n"); }
-        }
+        protected override int PowerComputing(string position) => _power;
+        ~Coach() { if (technical) Console.WriteLine("\n >> Coach destructor\n"); }
+    }
     class Amateur : Player
+    {
+        protected Amateur(string position) : base(1, position)
         {
-            protected Amateur(string position) : base(1, position)
-            {
-                if (technical)
-                    Console.WriteLine("\n >> Amateur constructor\n");
-            }
-            public static Amateur CreateAmateur(string position) => new(position);
-            protected override int PowerComputing(string position) => _power = new Random().Next(4, 13) / 4;
-            ~Amateur() { if (technical) Console.WriteLine("\n >> Amateur destructor\n"); }
+            if (technical)
+                Console.WriteLine("\n >> Amateur constructor\n");
+        }
+        public static Amateur CreateAmateur(string position) => new(position);
+        protected override int PowerComputing(string position) => _power = new Random().Next(4, 13) / 4;
+        ~Amateur() { if (technical) Console.WriteLine("\n >> Amateur destructor\n"); }
     }
     class Professional : Player
+    {
+        protected Professional(string position) : base(3, position)
         {
-            protected Professional(string position) : base(3, position)
-            {
-                if (technical)
-                    Console.WriteLine("\n >> Professional constructor\n");
-            }
-            public static Professional CreateProfessional(string position) =>
-                                    typeof(Goalkeeper).ToString().ToLower().Contains(position) ? Goalkeeper.CreateGoalkeeper() :
-                                    typeof(Defender).ToString().ToLower().Contains(position) ? Defender.CreateDefender() :
-                                    typeof(Midfielder).ToString().ToLower().Contains(position) ? Midfielder.CreateMidfielder() : Attacker.CreateAttacker();
-            protected override int PowerComputing(string position) => position == GetSpeciality(this) ? _power = 3 : _power = new Random().Next(2, 4);
-            ~Professional() { if (technical) Console.WriteLine("\n >> Professional destructor\n"); }
+            if (technical)
+                Console.WriteLine("\n >> Professional constructor\n");
         }
+        public static Professional CreateProfessional(string position) =>
+                                typeof(Goalkeeper).ToString().ToLower().Contains(position) ? Goalkeeper.CreateGoalkeeper() :
+                                typeof(Defender).ToString().ToLower().Contains(position) ? Defender.CreateDefender() :
+                                typeof(Midfielder).ToString().ToLower().Contains(position) ? Midfielder.CreateMidfielder() : Attacker.CreateAttacker();
+        protected override int PowerComputing(string position) => position == GetSpeciality(this) ? _power = 3 : _power = new Random().Next(2, 4);
+        ~Professional() { if (technical) Console.WriteLine("\n >> Professional destructor\n"); }
+    }
     class Goalkeeper : Professional
+    {
+        public static int count { get { return random < 0 ? ct.CountProfessional("goalkeeper") : rt.CountProfessional("goalkeeper"); } set { } }
+        private Goalkeeper() : base("goalkeeper")
         {
-            public static int count { get { return random < 0 ? ct.CountProfessional("goalkeeper") : rt.CountProfessional("goalkeeper"); } set { } }
-            private Goalkeeper() : base("goalkeeper")
-            {
-                if (technical)
-                    Console.WriteLine("\n >> Goalkeeper constructor\n");
-            }
-            public static Goalkeeper CreateGoalkeeper()
-            {
-                if (Player.count >= 16 || count >= 1)
-                    throw new OutOfLimitException(new OutOfLimitExceptionArgs("goalkeeper"));
-                return new Goalkeeper();
-            }
-            ~Goalkeeper() { if (technical) Console.WriteLine("\n >> Goalkeeper destructor\n"); }
+            if (technical)
+                Console.WriteLine("\n >> Goalkeeper constructor\n");
         }
+        public static Goalkeeper CreateGoalkeeper()
+        {
+            if (Player.count >= 16 || count >= 1)
+                throw new OutOfLimitException(new OutOfLimitExceptionArgs("goalkeeper"));
+            return new Goalkeeper();
+        }
+        ~Goalkeeper() { if (technical) Console.WriteLine("\n >> Goalkeeper destructor\n"); }
+    }
     class Defender : Professional
+    {
+        private Defender() : base("defender")
         {
-            private Defender() : base("defender")
-            {
-                if (technical)
-                    Console.WriteLine("\n >> Defender constructor\n");
-            }
-            public static Defender CreateDefender()
-            {
-                if (count >= 16 || CountCheck.Invoke("defender"))
-                    throw new OutOfLimitException(new OutOfLimitExceptionArgs("defender"));
-                return new Defender();
-            }
-            ~Defender() { if (technical) Console.WriteLine("\n >> Defender destructor\n"); }
+            if (technical)
+                Console.WriteLine("\n >> Defender constructor\n");
         }
+        public static Defender CreateDefender()
+        {
+            if (count >= 16 || CountCheck.Invoke("defender"))
+                throw new OutOfLimitException(new OutOfLimitExceptionArgs("defender"));
+            return new Defender();
+        }
+        ~Defender() { if (technical) Console.WriteLine("\n >> Defender destructor\n"); }
+    }
     class Midfielder : Professional
+    {
+        private Midfielder() : base("midfielder")
         {
-            private Midfielder() : base("midfielder")
-            {
-                if (technical)
-                    Console.WriteLine("\n >> Midfielder constructor\n");
-            }
-            public static Midfielder CreateMidfielder()
-            {
-                if (count >= 16 || CountCheck.Invoke("midfielder"))
-                    throw new OutOfLimitException(new OutOfLimitExceptionArgs("midfielder"));
-                return new Midfielder();
-            }
-            ~Midfielder() { if (technical) Console.WriteLine("\n >> Midfielder destructor\n"); }
+            if (technical)
+                Console.WriteLine("\n >> Midfielder constructor\n");
         }
+        public static Midfielder CreateMidfielder()
+        {
+            if (count >= 16 || CountCheck.Invoke("midfielder"))
+                throw new OutOfLimitException(new OutOfLimitExceptionArgs("midfielder"));
+            return new Midfielder();
+        }
+        ~Midfielder() { if (technical) Console.WriteLine("\n >> Midfielder destructor\n"); }
+    }
     class Attacker : Professional
+    {
+        private Attacker() : base("attacker")
         {
-            private Attacker() : base("attacker")
-            {
-                if (technical)
-                    Console.WriteLine("\n >> Attacker constructor\n");
-            }
-            public static Attacker CreateAttacker()
-            {
-                if (count >= 16 || CountCheck.Invoke("attacker"))
-                    throw new OutOfLimitException(new OutOfLimitExceptionArgs("attacker"));
-                return new Attacker();
-            }
-            ~Attacker() { if (technical) Console.WriteLine("\n >> Attacker destructor\n"); }
+            if (technical)
+                Console.WriteLine("\n >> Attacker constructor\n");
         }
+        public static Attacker CreateAttacker()
+        {
+            if (count >= 16 || CountCheck.Invoke("attacker"))
+                throw new OutOfLimitException(new OutOfLimitExceptionArgs("attacker"));
+            return new Attacker();
+        }
+        ~Attacker() { if (technical) Console.WriteLine("\n >> Attacker destructor\n"); }
+    }
     /*
         static void GarbageCollector()
         {
@@ -407,71 +407,71 @@
            Player.Restart();
         }*/
     static void Main()
+    {
+        Program p = new Program();
+        technical = p.CheckAnswer("Do you want to show technical inscriptions?");
+        Console.WriteLine("Press any key to start");
+        Console.ReadKey();
+        Start();
+        while (true)
         {
-            Program p = new Program();
-            technical = p.CheckAnswer("Do you want to show technical inscriptions?");
-            Console.WriteLine("Press any key to start");
-            Console.ReadKey();
-            Start();
-            while (true)
+            if (help)
+                Console.WriteLine("amateur - add a new non-professional player to the team\n" +
+                      "professional - add a new professional player to the team\n" +
+                      "switch - switch the player at specific position\n" +
+                      "write - show the current team information\n" +
+                      "team - create a new team with current coach\n" +
+                      "play - start the match with an enemy team\n" +
+                      "restart - full restart\n" +
+                      "exit - exit application\n" +
+                      /*"gc - test garbage collector\n" +*/
+                      "technical - show / hide technical inscriptions\n" +
+                      "help - show / hide instructions\n");
+            Console.Write("Enter the command: ");
+            switch (Console.ReadLine().ToLower())
             {
-                if (help)
-                    Console.WriteLine("amateur - add a new non-professional player to the team\n" +
-                          "professional - add a new professional player to the team\n" +
-                          "switch - switch the player at specific position\n" +
-                          "write - show the current team information\n" +
-                          "team - create a new team with current coach\n" +
-                          "play - start the match with an enemy team\n" +
-                          "restart - full restart\n" +
-                          "exit - exit application\n" +
-                          /*"gc - test garbage collector\n" +*/
-                          "technical - show / hide technical inscriptions\n" +
-                          "help - show / hide instructions\n");
-                Console.Write("Enter the command: ");
-                switch (Console.ReadLine().ToLower())
-                {
-                    case "amateur":
-                        try { IPlayer<Amateur>.CreatePlayer(); }
-                        catch (OutOfLimitException e) { Console.WriteLine(e.Message); }
-                        break;
-                    case "professional":
-                        try { IPlayer<Professional>.CreatePlayer(); }
-                        catch (OutOfLimitException e) { Console.WriteLine(e.Message); }
-                        break;
-                    case "switch": ct.Switch(); break;
-                    case "write": ct.WriteOut(); break;
-                    case "team": if (p.CheckAnswer("Are you sure you want to create new team instead the current one?")) ct.CreateTeam(); break;
-                    case "play": if (p.CheckAnswer("Are you sure you want to play the match?")) Play(); break;
-                    case "restart": if (p.CheckAnswer("Are you sure you want to restart?")) Restart(); break;
-                    case "exit": if (p.CheckAnswer("Are you sure you want to exit?")) Environment.Exit(0); break;
-                    /*case "gc": GarbageCollector(); break;*/
-                    case "technical": technical = !technical; break;
-                    case "help": help = !help; break;
-                    default: Console.WriteLine("The command is not found."); break;
-                }
-                Console.WriteLine();
+                case "amateur":
+                    try { IPlayer<Amateur>.CreatePlayer(); }
+                    catch (OutOfLimitException e) { Console.WriteLine(e.Message); }
+                    break;
+                case "professional":
+                    try { IPlayer<Professional>.CreatePlayer(); }
+                    catch (OutOfLimitException e) { Console.WriteLine(e.Message); }
+                    break;
+                case "switch": ct.Switch(); break;
+                case "write": ct.WriteOut(); break;
+                case "team": if (p.CheckAnswer("Are you sure you want to create new team instead the current one?")) ct.CreateTeam(); break;
+                case "play": if (p.CheckAnswer("Are you sure you want to play the match?")) Play(); break;
+                case "restart": if (p.CheckAnswer("Are you sure you want to restart?")) Restart(); break;
+                case "exit": if (p.CheckAnswer("Are you sure you want to exit?")) Environment.Exit(0); break;
+                /*case "gc": GarbageCollector(); break;*/
+                case "technical": technical = !technical; break;
+                case "help": help = !help; break;
+                default: Console.WriteLine("The command is not found."); break;
             }
+            Console.WriteLine();
         }
+    }
     static void Start()
-        {
-            ct = new CustomTeam();
-            ct.Start(true);
-            Console.Clear();
-        }
+    {
+        ct = new CustomTeam();
+        ct.Start(true);
+        Console.Clear();
+    }
     static void Restart()
-        {
-            ct.Restart();
-        }
+    {
+        ct.Restart();
+    }
     static void Play()
-        {
-            rt = new RandomTeam();
-            rt.Start(true);
-            Console.Clear();
-            ct.WriteOut();
-            Console.WriteLine("------------------ VS ------------------");
-            rt.WriteOut();
-            Console.WriteLine("----------------------------------------\nWinner: " + Team.Winner);
-        }
+    {
+        rt = new RandomTeam();
+        rt.Start(true);
+        Console.Clear();
+        ct.WriteOut();
+        Console.WriteLine("------------------ VS ------------------");
+        rt.WriteOut();
+        Console.WriteLine("----------------------------------------\nWinner: " + Team.Winner);
+    }
 }
 public static class ProgramExtension
 {

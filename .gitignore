@@ -44,3 +44,5 @@
 /sem_1_lab_2/obj/project.nuget.cache
 /sem_1_lab_2/obj/Release/net8.0/sem_1_lab_2.AssemblyInfo.cs
 /sem_1_lab_2/obj/sem_1_lab_2.csproj.nuget.dgspec.json
+*.tmp
+/sem_1_lab_2/~$отокол ЛР2.docx
