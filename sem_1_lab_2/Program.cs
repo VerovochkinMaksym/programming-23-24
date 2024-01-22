@@ -9,23 +9,23 @@
     static List<string> positions = new List<string>() { "goalkeeper", "defender", "midfielder", "attacker" };
     static string GetSpeciality(object player) => player.GetType().Name.ToLower();
     interface IPlayer<T> where T : Player
+    {
+        static Player CreatePlayer()
         {
-            static Player CreatePlayer()
+            if ((random < 0 ? ct.TeamCount : rt.TeamCount) >= 16)
+                throw new OutOfLimitException(new OutOfLimitExceptionArgs(typeof(T).Name));
+            string? position = null;
+            do
             {
-                if ((random < 0 ? ct.TeamCount : rt.TeamCount) >= 16)
-                    throw new OutOfLimitException(new OutOfLimitExceptionArgs(typeof(T).Name));
-                string? position = null;
-                do
-                {
-                    Console.Write("Enter a player's position (goalkeeper, defender, midfielder or attaker): ");
-                    try { position = Console.ReadLine(); }
-                    catch (FormatException) { Console.WriteLine("Format error..."); }
-                }
-                while (!positions.Contains(position));
-                Func<string, Player> Create = (p) => typeof(T) == typeof(Amateur) ? Amateur.CreateAmateur(p) : Professional.CreateProfessional(p);
-                return Create(position);
+                Console.Write("Enter a player's position (goalkeeper, defender, midfielder or attaker): ");
+                try { position = Console.ReadLine(); }
+                catch (FormatException) { Console.WriteLine("Format error..."); }
             }
+            while (!positions.Contains(position));
+            Func<string, Player> Create = (p) => typeof(T) == typeof(Amateur) ? Amateur.CreateAmateur(p) : Professional.CreateProfessional(p);
+            return Create(position);
         }
+    }
     abstract class Team
     {
         protected string? _name;
@@ -38,161 +38,161 @@
         protected int[]? _tactics;
         public abstract void Start(bool new_coach);
         public void Add(Player p)
-            {
-                Refresh();
-                _team.Add(p);
-                Refresh();
-                _team.Last().SetPower(_team.Last().Recompute(_team.Last().info.position));
-            }
+        {
+            Refresh();
+            _team.Add(p);
+            Refresh();
+            _team.Last().SetPower(_team.Last().Recompute(_team.Last().info.position));
+        }
         public void Refresh()
-            {
-                Player.TacticsByPosition = (p) => _tactics[positions.IndexOf(p) - 1];
-                Player.CountCheck = (p) => CountProfessional(p) >= Player.TacticsByPosition.Invoke(p);
-                Player.ContainsPlayer = (n) => _team.Exists(x => x.info.number == n);
-            }
+        {
+            Player.TacticsByPosition = (p) => _tactics[positions.IndexOf(p) - 1];
+            Player.CountCheck = (p) => CountProfessional(p) >= Player.TacticsByPosition.Invoke(p);
+            Player.ContainsPlayer = (n) => _team.Exists(x => x.info.number == n);
+        }
         public void CreateTeam()
-            {
-                foreach (Player player in _team)
-                    if (GetSpeciality(player) != "coach")
-                        player.Dispose();
-                Start(false);
-            }
-        public void Switch()
-            {
-                string? position = null;
-                do
-                {
-                    Console.Write("Enter a position to switch (goalkeeper, defender, midfielder or attacker): ");
-                    try { position = Console.ReadLine(); }
-                    catch (FormatException) { Console.WriteLine("Format error..."); }
-                }
-                while (!positions.Contains(position));
-                List<Player> l = _team.FindAll(x => x.info.position == position);
-                if (l.Count == 0)
-                {
-                    Console.WriteLine("There are no players at the positions of this type...");
-                    return;
-                }
-                foreach (Player player in l)
-                    Console.WriteLine("({0}) {1} - {2} - {3}", player.info.number, player.info.name, player.info.power * 100, GetSpeciality(player));
-                int? number1 = null;
-                do
-                {
-                    Console.Write("Enter the number of the first player to switch: ");
-                    try { number1 = int.Parse(Console.ReadLine()); }
-                    catch (FormatException) { Console.WriteLine("Format error..."); }
-                }
-                while (!_team.FindAll(x => x.info.position == position).Exists(x => x.info.number == number1));
-                foreach (Player player in _team.FindAll(x => x.info.position != null && x.info.number != number1))
-                    Console.WriteLine("({0}) {1} [{2}] - {3} - {4}", player.info.number, player.info.name, player.info.position,
-                                                                     player.info.power * 100, GetSpeciality(player));
-                foreach (Player player in _team.FindAll(x => x.info.position == null && x.info.number != number1))
-                    Console.WriteLine("({0}) {1} - {2} - {3}", player.info.number, player.info.name, player.info.power * 100, GetSpeciality(player));
-                int? number2 = null;
-                do
-                {
-                    Console.Write("Enter the number of the second player to switch: ");
-                    try { number2 = int.Parse(Console.ReadLine()); }
-                    catch (FormatException) { Console.WriteLine("Format error..."); }
-                }
-                while (!_team.FindAll(x => x.info.number != number1).ToList().Exists(x => x.info.number == number2));
-                _team[_team.FindIndex(x => x.info.number == number1)].info.position = _team[_team.FindIndex(x => x.info.number == number2)].info.position;
-                _team[_team.FindIndex(x => x.info.number == number2)].info.position = position;
-                foreach (Player player in _team)
-                    _team[_team.IndexOf(player)].info.power = player.Recompute(player.info.position);
-            }
-        public void WriteOut()
-            {
-                Console.WriteLine("Team: {0}", _name);
-                Console.WriteLine("Tactics: {0}-{1}-{2}", _tactics[0], _tactics[1], _tactics[2]);
-                Console.WriteLine("Team composition: ");
-                foreach (Player player in _team.FindAll(x => x.info.position != null))
-                    Console.WriteLine("({0}) {1} [{2}] - {3} - {4}", player.info.number, player.info.name, player.info.position,
-                                                                     player.info.power * 100, GetSpeciality(player));
-                Console.WriteLine("Reserve players: ");
-                foreach (Player player in _team.FindAll(x => x.info.position == null))
-                    Console.WriteLine("({0}) {1} - {2} - {3}", player.info.number, player.info.name, player.info.power * 100, GetSpeciality(player));
-                Console.WriteLine("Team power: " + _team.FindAll(x => x.info.position != null).Sum(x => x.info.power * 100));
-            }
-        public void Restart()
-            {
-                foreach (Player player in _team)
+        {
+            foreach (Player player in _team)
+                if (GetSpeciality(player) != "coach")
                     player.Dispose();
-                Start(true);
+            Start(false);
+        }
+        public void Switch()
+        {
+            string? position = null;
+            do
+            {
+                Console.Write("Enter a position to switch (goalkeeper, defender, midfielder or attacker): ");
+                try { position = Console.ReadLine(); }
+                catch (FormatException) { Console.WriteLine("Format error..."); }
             }
+            while (!positions.Contains(position));
+            List<Player> l = _team.FindAll(x => x.info.position == position);
+            if (l.Count == 0)
+            {
+                Console.WriteLine("There are no players at the positions of this type...");
+                return;
+            }
+            foreach (Player player in l)
+                Console.WriteLine("({0}) {1} - {2} - {3}", player.info.number, player.info.name, player.info.power * 100, GetSpeciality(player));
+            int? number1 = null;
+            do
+            {
+                Console.Write("Enter the number of the first player to switch: ");
+                try { number1 = int.Parse(Console.ReadLine()); }
+                catch (FormatException) { Console.WriteLine("Format error..."); }
+            }
+            while (!_team.FindAll(x => x.info.position == position).Exists(x => x.info.number == number1));
+            foreach (Player player in _team.FindAll(x => x.info.position != null && x.info.number != number1))
+                Console.WriteLine("({0}) {1} [{2}] - {3} - {4}", player.info.number, player.info.name, player.info.position,
+                                                                 player.info.power * 100, GetSpeciality(player));
+            foreach (Player player in _team.FindAll(x => x.info.position == null && x.info.number != number1))
+                Console.WriteLine("({0}) {1} - {2} - {3}", player.info.number, player.info.name, player.info.power * 100, GetSpeciality(player));
+            int? number2 = null;
+            do
+            {
+                Console.Write("Enter the number of the second player to switch: ");
+                try { number2 = int.Parse(Console.ReadLine()); }
+                catch (FormatException) { Console.WriteLine("Format error..."); }
+            }
+            while (!_team.FindAll(x => x.info.number != number1).ToList().Exists(x => x.info.number == number2));
+            _team[_team.FindIndex(x => x.info.number == number1)].info.position = _team[_team.FindIndex(x => x.info.number == number2)].info.position;
+            _team[_team.FindIndex(x => x.info.number == number2)].info.position = position;
+            foreach (Player player in _team)
+                _team[_team.IndexOf(player)].info.power = player.Recompute(player.info.position);
+        }
+        public void WriteOut()
+        {
+            Console.WriteLine("Team: {0}", _name);
+            Console.WriteLine("Tactics: {0}-{1}-{2}", _tactics[0], _tactics[1], _tactics[2]);
+            Console.WriteLine("Team composition: ");
+            foreach (Player player in _team.FindAll(x => x.info.position != null))
+                Console.WriteLine("({0}) {1} [{2}] - {3} - {4}", player.info.number, player.info.name, player.info.position,
+                                                                 player.info.power * 100, GetSpeciality(player));
+            Console.WriteLine("Reserve players: ");
+            foreach (Player player in _team.FindAll(x => x.info.position == null))
+                Console.WriteLine("({0}) {1} - {2} - {3}", player.info.number, player.info.name, player.info.power * 100, GetSpeciality(player));
+            Console.WriteLine("Team power: " + _team.FindAll(x => x.info.position != null).Sum(x => x.info.power * 100));
+        }
+        public void Restart()
+        {
+            foreach (Player player in _team)
+                player.Dispose();
+            Start(true);
+        }
     }
     class CustomTeam : Team
+    {
+        static CustomTeam()
         {
-            static CustomTeam()
+            if (technical)
             {
-                if (technical)
-                {
-                    Console.WriteLine("\n >> CustomTeam static constructor. Press any key to continue...\n");
-                    Console.ReadKey();
-                }
-            }
-            public override void Start(bool new_coach)
-            {
-                Console.Clear();
-                _team = _team.FindAll(x => GetSpeciality(x) == "coach" && new_coach == false);
-                Refresh();
-                if (new_coach)
-                    Coach.CreateCoach();
-                _name = null;
-                do
-                {
-                    Console.Write("Enter a team name: ");
-                    try { _name = Console.ReadLine(); }
-                    catch (FormatException) { Console.WriteLine("Format error..."); }
-                }
-                while (_name == null);
-                _tactics = new int[3];
-                do
-                {
-                    Console.Write("Enter a tactic deployment (capacities of 10 positions df-mf-at), separated by '-': ");
-                    try { _tactics = Console.ReadLine().Split('-').Select(int.Parse).ToArray(); }
-                    catch (FormatException) { Console.WriteLine("Format error..."); }
-                    catch (Exception e) { Console.WriteLine(e.Message); }
-                }
-                while (_tactics.Sum() != 10);
+                Console.WriteLine("\n >> CustomTeam static constructor. Press any key to continue...\n");
+                Console.ReadKey();
             }
         }
+        public override void Start(bool new_coach)
+        {
+            Console.Clear();
+            _team = _team.FindAll(x => GetSpeciality(x) == "coach" && new_coach == false);
+            Refresh();
+            if (new_coach)
+                Coach.CreateCoach();
+            _name = null;
+            do
+            {
+                Console.Write("Enter a team name: ");
+                try { _name = Console.ReadLine(); }
+                catch (FormatException) { Console.WriteLine("Format error..."); }
+            }
+            while (_name == null);
+            _tactics = new int[3];
+            do
+            {
+                Console.Write("Enter a tactic deployment (capacities of 10 positions df-mf-at), separated by '-': ");
+                try { _tactics = Console.ReadLine().Split('-').Select(int.Parse).ToArray(); }
+                catch (FormatException) { Console.WriteLine("Format error..."); }
+                catch (Exception e) { Console.WriteLine(e.Message); }
+            }
+            while (_tactics.Sum() != 10);
+        }
+    }
     class RandomTeam : Team
+    {
+        static RandomTeam()
         {
-            static RandomTeam()
+            if (technical)
             {
-                if (technical)
-                {
-                    Console.WriteLine("\n >> RandomTeam static constructor. Press any key to continue...\n");
-                    Console.ReadKey();
-                }
-            }
-            public override void Start(bool new_coach)
-            {
-                Console.Clear();
-                _name = "Enemy team";
-                _tactics = new int[3];
-                Random tactics_random = new Random();
-                _tactics[0] = tactics_random.Next(1, 6);
-                _tactics[1] = tactics_random.Next(Math.Max(5 - _tactics[0], 1), Math.Min(9 - _tactics[0], 5));
-                _tactics[2] = 10 - _tactics.Sum();
-                if (new_coach)
-                    random = 0;
-                rt.Add(Coach.CreateCoach());
-                for (random = 1; random <= 4; random++)
-                    rt.Add(Amateur.CreateAmateur(null));
-                for (int i = random; random < i + 1; random++)
-                    rt.Add(Goalkeeper.CreateGoalkeeper());
-                for (int i = random; random < i + _tactics[0]; random++)
-                    rt.Add(Defender.CreateDefender());
-                for (int i = random; random < i + _tactics[1]; random++)
-                    rt.Add(Midfielder.CreateMidfielder());
-                for (int i = random; random < i + _tactics[2]; random++)
-                    rt.Add(Attacker.CreateAttacker());
-                random = -1;
-                ct.Refresh();
+                Console.WriteLine("\n >> RandomTeam static constructor. Press any key to continue...\n");
+                Console.ReadKey();
             }
         }
+        public override void Start(bool new_coach)
+        {
+            Console.Clear();
+            _name = "Enemy team";
+            _tactics = new int[3];
+            Random tactics_random = new Random();
+            _tactics[0] = tactics_random.Next(1, 6);
+            _tactics[1] = tactics_random.Next(Math.Max(5 - _tactics[0], 1), Math.Min(9 - _tactics[0], 5));
+            _tactics[2] = 10 - _tactics.Sum();
+            if (new_coach)
+                random = 0;
+            rt.Add(Coach.CreateCoach());
+            for (random = 1; random <= 4; random++)
+                rt.Add(Amateur.CreateAmateur(null));
+            for (int i = random; random < i + 1; random++)
+                rt.Add(Goalkeeper.CreateGoalkeeper());
+            for (int i = random; random < i + _tactics[0]; random++)
+                rt.Add(Defender.CreateDefender());
+            for (int i = random; random < i + _tactics[1]; random++)
+                rt.Add(Midfielder.CreateMidfielder());
+            for (int i = random; random < i + _tactics[2]; random++)
+                rt.Add(Attacker.CreateAttacker());
+            random = -1;
+            ct.Refresh();
+        }
+    }
     class Player : IPlayer<Amateur>, IPlayer<Professional>
     {
         public static Func<string, bool> CountCheck;
@@ -207,33 +207,33 @@
         private string? _position = null;
         public GetPlayerInfo info;
         public struct GetPlayerInfo
+        {
+            public string? name = null;
+            public int? number = null;
+            public int? power = null;
+            public string? position = null;
+            public GetPlayerInfo(Player p)
             {
-                public string? name = null;
-                public int? number = null;
-                public int? power = null;
-                public string? position = null;
-                public GetPlayerInfo(Player p)
-                {
-                    name = p._name;
-                    number = p._number;
-                    power = p._power;
-                    position = p._position;
-                }
+                name = p._name;
+                number = p._number;
+                power = p._power;
+                position = p._position;
             }
+        }
         protected Player(int power, string position)
-            {
-                Recompute = new RecomputeHandler(PowerComputing);
-                SetPower = delegate (int a) { _power = a; };
-                if (technical)
-                    Console.WriteLine("\n >> Player constructor\n");
-                if (random == 0)
+        {
+            Recompute = new RecomputeHandler(PowerComputing);
+            SetPower = delegate (int a) { _power = a; };
+            if (technical)
+                Console.WriteLine("\n >> Player constructor\n");
+            if (random == 0)
                 {
                     _name = "Coach";
                     _number = new Random().Next(1, 100);
                     _power = power;
                     info = new GetPlayerInfo(this);
                 }
-                else if (random > 0)
+            else if (random > 0)
                 {
                     _name = "Player" + random;
                     do
@@ -243,38 +243,37 @@
                     _position = position;
                     info = new GetPlayerInfo(this);
                 }
-                else
+            else
+            {
+                do
                 {
-                    do
-                    {
-                        Console.Write("Enter a {0}'s name: ", GetSpeciality(this));
-                        try { if ((_name = Console.ReadLine()) == null) throw new NullNameException(); }
-                        catch (FormatException) { Console.WriteLine("Format error..."); }
-                        catch (NullNameException) { Console.WriteLine(NullNameException.message); }
-                    }
-                    while (_name == null);
-                    int number = -1;
-                    do
-                    {
-                        Console.Write("Enter a {0}'s number: ", GetSpeciality(this));
-                        try { number = int.Parse(Console.ReadLine()); }
-                        catch (FormatException) { Console.WriteLine("Format error..."); }
-                    }
-                    while (!(number >= 1 && number <= 99 && (ContainsPlayer == null ? true : !ContainsPlayer(number))));
-                    _number = number;
-                    _power = power;
-                    if (position != null && ct.Count(position) < (position == "goalkeeper" ? 1 : TacticsByPosition(position)))
-                        _position = position;
-                    info = new GetPlayerInfo(this);
-                    ct.Add(this);
+                    Console.Write("Enter a {0}'s name: ", GetSpeciality(this));
+                    try { _name = Console.ReadLine(); }
+                    catch (FormatException) { Console.WriteLine("Format error..."); }
                 }
+                while (_name == null);
+                int number = -1;
+                do
+                {
+                    Console.Write("Enter a {0}'s number: ", GetSpeciality(this));
+                    try { number = int.Parse(Console.ReadLine()); }
+                    catch (FormatException) { Console.WriteLine("Format error..."); }
+                }
+                while (!(number >= 1 && number <= 99 && (ContainsPlayer == null ? true : !ContainsPlayer(number))));
+                _number = number;
+                _power = power;
+                if (position != null && ct.Count(position) < (position == "goalkeeper" ? 1 : TacticsByPosition(position)))
+                    _position = position;
+                info = new GetPlayerInfo(this);
+                ct.Add(this);
             }
+        }
         protected virtual int PowerComputing(string position) => _power = new Random().Next(4, 13) / 4;
         public void Dispose()
-            {
-                Console.WriteLine("Disposing...");
-                GC.SuppressFinalize(this);
-            }
+        {
+            Console.WriteLine("Disposing...");
+            GC.SuppressFinalize(this);
+        }
         ~Player() { if (technical) Console.WriteLine("\n >> Player destructor\n"); }
     }
     class Coach : Player
@@ -303,7 +302,8 @@
             }
             public static Amateur CreateAmateur(string position) => new(position);
             protected override int PowerComputing(string position) => _power = new Random().Next(4, 13) / 4;
-        }
+            ~Amateur() { if (technical) Console.WriteLine("\n >> Amateur destructor\n"); }
+    }
     class Professional : Player
         {
             protected Professional(string position) : base(3, position)
@@ -486,10 +486,6 @@ public static class ProgramExtension
         } while (ans != 'y' && ans != 'n');
         return ans == 'y' ? true : false;
     }
-}
-public class NullNameException : Exception
-{
-    public const string message = "The name cannot be empty!";
 }
 public class OutOfLimitException : Exception
 {
