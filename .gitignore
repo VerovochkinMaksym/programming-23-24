@@ -10,3 +10,5 @@
 *.sln
 *.csproj
 /sem_1_lab_3/bin/Debug/net8.0
+/Task 2/obj
+/Task 2/bin/Debug/net8.0
