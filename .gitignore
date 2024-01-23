@@ -5,3 +5,8 @@
 /.vs
 /sem_1_lab_1
 /sem_1_lab_2
+/sem_1_lab_3/.vs/sem_1_lab_3
+/sem_1_lab_3/obj
+*.sln
+*.csproj
+/sem_1_lab_3/bin/Debug/net8.0
