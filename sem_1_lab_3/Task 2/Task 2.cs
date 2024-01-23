@@ -2,7 +2,7 @@
 {
     static void Main()
     {
-        Apprehended ap = new Apprehended();
+        IApprehend ap = new Apprehended();
         ap.Apprehend(3);
         ap.Apprehend(5);
         ap.Apprehend(6);
@@ -28,6 +28,10 @@ public static class Registry
 public interface IApprehend
 {
     string ApprehendInfo(int time);
+    void Apprehend(int time)
+    {
+        Console.WriteLine("\nApprehending information:\n{0}-------------------------------------", ApprehendInfo(time));
+    }
 }
 public class Offender : IApprehend
 {
@@ -46,7 +50,7 @@ public class Offender : IApprehend
     }
     public string ApprehendInfo(int time)
     {
-        return String.Format("Name: {0}\nAge: {1}\nHeight {2}\nTime of apprehending: {3}\n", _name, _age, _height, time);
+        return String.Format("Name: {0}\nAge: {1}\nHeight {2}\nDuration of apprehending: {3}\n", _name, _age, _height, time);
     }
 }
 public class Apprehended : IApprehend
@@ -55,10 +59,6 @@ public class Apprehended : IApprehend
     private string _date;
     private string _reason;
     private Offender offender;
-    public void Apprehend(int time)
-    {
-        Console.WriteLine("\nApprehending information:\n{0}-------------------------------------", ApprehendInfo(time));
-    }
     public string ApprehendInfo(int time)
     {
         if (offender == null)

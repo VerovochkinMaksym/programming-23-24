@@ -6,7 +6,7 @@
         Product p2 = new Medicines("Citramon", "analgesics", "2028 June", 109.00);
         Product p3 = new ImportedMedicines(new Medicines("Acetylsalicylic acid", "analgesics", "2024 May", 205.45), true);
         Product p4 = new Medicines("Analgin", "analgesics", "2024 December", 23.40);
-        Product p5 = new ImportedMedicines(new Medicines("Ambroxol extra", "cough medicine", "2027 April", 456.88), false);
+        Product p5 = new ImportedMedicines(new Medicines("Ambroxol extra", "cough medicine", "2027 April", 456.88), false); 
         List<Product> products = new List<Product> { p1, p2, p3, p4, p5 };
         Pharmacy.Add(products);
         foreach (Product product in products)
